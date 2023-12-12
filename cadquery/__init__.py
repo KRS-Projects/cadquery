@@ -7,7 +7,7 @@ except PackageNotFoundError:
     __version__ = "2.4-dev"
 
 # these items point to the OCC implementation
-from .occ_impl.geom import Plane, BoundBox, Vector, Matrix, Location
+from .occ_impl.geom import Plane, BoundBox, Vector, Matrix, Location, OrientedBoundBox
 from .occ_impl.shapes import (
     Shape,
     Vertex,
@@ -52,6 +52,7 @@ __all__ = [
     "selectors",
     "Plane",
     "BoundBox",
+    "OrientedBoundBox"
     "Matrix",
     "Vector",
     "Location",
@@ -77,3 +78,4 @@ __all__ = [
     "plugins",
     "Sketch",
 ]
+

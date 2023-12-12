@@ -15,7 +15,7 @@ from OCP.gp import (
     gp_EulerSequence,
     gp,
 )
-from OCP.Bnd import Bnd_Box
+from OCP.Bnd import Bnd_Box, Bnd_OBB
 from OCP.BRepBndLib import BRepBndLib
 from OCP.BRepMesh import BRepMesh_IncrementalMesh
 from OCP.TopoDS import TopoDS_Shape
@@ -930,6 +930,60 @@ class BoundBox(object):
             return True
         else:
             return False
+
+
+class OrientedBoundBox(object):
+    """An Oriented Bounding Box for an object or set of objects. Wraps the OCP one"""
+
+    wrapped: Bnd_OBB
+
+    xdir: float
+    xlen: float
+
+    ydir: float
+    ylen: float
+
+    zdir: float
+    zlen: float
+
+    center: Vector
+    DiagonalLength: float
+
+    def __init__(self, bb: Bnd_OBB) -> None:
+        self.wrapped = bb
+
+        self.xdir = bb.XDirection().Coord()
+        self.ydir = bb.YDirection().Coord()
+        self.zdir = bb.ZDirection().Coord()
+        self.xlen = bb.XHSize()
+        self.ylen = bb.YHSize()
+        self.zlen = bb.ZHSize()
+        self.center = Vector(*bb.Center().Coord())
+
+        self.DiagonalLength = self.wrapped.SquareExtent() ** 0.5
+
+    def enlarge(self, tol: float) -> "OrientedBoundBox":
+        """Returns a modified (expanded) bounding box, expanded in all
+        directions by the tolerance value.
+        """
+        tmp = Bnd_Box()
+        BRepBndLib.AddOBB_s(self.wrapped, tmp)
+        tmp.Enlarge(tol)
+
+        return OrientedBoundBox(tmp)
+
+    @classmethod
+    def _fromTopoDS(
+            cls: Type["OrientedBoundBox"],
+            shape: TopoDS_Shape,
+    ):
+        """
+        Constructs an oriented bounding box from a TopoDS_Shape
+        """
+        bbox = Bnd_OBB()
+        BRepBndLib.AddOBB_s(shape, bbox)
+
+        return cls(bbox)
 
 
 class Location(object):
